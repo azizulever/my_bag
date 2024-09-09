@@ -8,139 +8,75 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: ShoppingCart(),
-      debugShowCheckedModeBanner: false,
+      home: Home(),
     );
   }
 }
 
-class ShoppingCart extends StatefulWidget {
+class Home extends StatefulWidget {
   @override
-  _ShoppingCartState createState() => _ShoppingCartState();
+  State<Home> createState() => _HomeState();
 }
 
-class _ShoppingCartState extends State<ShoppingCart> {
-  int pulloverCount = 1;
-  int tShirtCount = 1;
-  int sportDressCount = 1;
-
-  int pulloverPrice = 51;
-  int tShirtPrice = 30;
-  int sportDressPrice = 43;
-
-  int get totalAmount {
-    return (pulloverCount * pulloverPrice) +
-        (tShirtCount * tShirtPrice) +
-        (sportDressCount * sportDressPrice);
-  }
+class _HomeState extends State<Home> {
+  final List<Map<String, dynamic>> items = [
+    {'name': 'Pullover', 'color': 'Black', 'size': 'L', 'price': 51, 'image': 'assets/images/pullover.png'},
+    {'name': 'T-Shirt', 'color': 'Gray', 'size': 'L', 'price': 30, 'image': 'assets/images/tshirt.png'},
+    {'name': 'Sport Dress', 'color': 'Black', 'size': 'M', 'price': 43, 'image': 'assets/images/sport_dress.png'},
+  ];
 
   @override
   Widget build(BuildContext context) {
+    double totalAmount = items.fold(0, (sum, item) => sum + item['price']);
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('My Bag'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        elevation: 0,
+        title: const Text(
+          'My Bag',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
+        ),
+        centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            itemRow('Pullover', 'Black', 'L', pulloverCount, pulloverPrice,
-                    (value) {
-                  setState(() {
-                    pulloverCount = value;
-                  });
-                }),
-            SizedBox(height: 10),
-            itemRow('T-Shirt', 'Gray', 'L', tShirtCount, tShirtPrice, (value) {
-              setState(() {
-                tShirtCount = value;
-              });
-            }),
-            SizedBox(height: 10),
-            itemRow('Sport Dress', 'Black', 'M', sportDressCount,
-                sportDressPrice, (value) {
-                  setState(() {
-                    sportDressCount = value;
-                  });
-                }),
-            Spacer(),
-            Divider(),
-            totalAmountRow(),
-            SizedBox(height: 10),
-            checkoutButton(context),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget itemRow(String title, String color, String size, int count, int price,
-      ValueChanged<int> onChanged) {
-    return Row(
-      children: [
-        Image.asset(
-          'assets/images/logo.png', // Replace with your image asset path
-          width: 50,
-          height: 50,
-        ),
-        SizedBox(width: 10),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: TextStyle(fontSize: 16)),
-            Text('Color: $color', style: TextStyle(color: Colors.grey)),
-            Text('Size: $size', style: TextStyle(color: Colors.grey)),
-          ],
-        ),
-        Spacer(),
-        Row(
-          children: [
-            IconButton(
-              icon: Icon(Icons.remove),
-              onPressed: () {
-                if (count > 1) onChanged(count - 1);
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              itemCount: items.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  leading: Image.asset(items[index]['image'], width: 50, height: 50),
+                  title: Text(items[index]['name']),
+                  subtitle: Text('Color: ${items[index]['color']} | Size: ${items[index]['size']}'),
+                  trailing: Text('\$${items[index]['price']}'),
+                );
               },
             ),
-            Text('$count', style: TextStyle(fontSize: 16)),
-            IconButton(
-              icon: Icon(Icons.add),
-              onPressed: () {
-                onChanged(count + 1);
-              },
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Total amount: \$${totalAmount.toStringAsFixed(2)}',
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () {},
+                  child: const Text(
+                    'CHECK OUT',
+                    style: TextStyle(fontSize: 20),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    backgroundColor: Colors.red,
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-        SizedBox(width: 10),
-        Text('\$${price * count}', style: TextStyle(fontSize: 16)),
-      ],
-    );
-  }
-
-  Widget totalAmountRow() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text('Total amount:', style: TextStyle(fontSize: 18)),
-        Text('\$$totalAmount', style: TextStyle(fontSize: 18)),
-      ],
-    );
-  }
-
-  Widget checkoutButton(BuildContext context) {
-    return ElevatedButton(
-      onPressed: () {
-        final snackBar = SnackBar(
-          content: Text('Congratulations! Checkout successful.'),
-        );
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      },
-      child: Text('CHECK OUT'),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.red,
-        minimumSize: Size(double.infinity, 50),
+          ),
+        ],
       ),
     );
   }
